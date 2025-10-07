@@ -4,6 +4,12 @@ import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
+// Add viewport export for Next.js 14+ App Router
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function PassResetPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,11 +22,13 @@ export default function PassResetPage() {
     setLoading(true);
 
     try {
+      if (!email) throw new Error("Missing email in URL.");
+
       // Update password
       const { error: passError } = await supabase.auth.updateUser({ password });
       if (passError) throw passError;
 
-      // Fetch role from tables
+      // Determine role
       const { data: teacher } = await supabase
         .from("course_teacher")
         .select("teacher_email")
@@ -33,9 +41,10 @@ export default function PassResetPage() {
         .eq("email", email)
         .maybeSingle();
 
-      const role = teacher ? "teacher" : "student";
+      const role = teacher ? "teacher" : student ? "student" : null;
+      if (!role) throw new Error("User not found in database.");
 
-      // Mark metadata as complete
+      // Update metadata
       const { error: metaError } = await supabase.auth.updateUser({
         data: { role, password_set: true },
       });
@@ -44,7 +53,7 @@ export default function PassResetPage() {
       router.push(role === "teacher" ? "/teacher" : "/student");
     } catch (err) {
       console.error("Password setup error:", err);
-      alert("Error setting password. Try again.");
+      alert(err.message || "Error setting password. Try again.");
     } finally {
       setLoading(false);
     }
