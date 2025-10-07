@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
-export default function PasswordPage({ searchParams }) {
+function PasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    if (searchParams?.email) setEmail(searchParams.email);
+    const emailParam = searchParams.get("email");
+    if (emailParam) setEmail(emailParam);
   }, [searchParams]);
 
   const handlePasswordLogin = async (e) => {
@@ -63,5 +65,17 @@ export default function PasswordPage({ searchParams }) {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function PasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div>Loading...</div>
+      </div>
+    }>
+      <PasswordForm />
+    </Suspense>
   );
 }
