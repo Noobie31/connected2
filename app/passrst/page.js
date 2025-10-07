@@ -4,10 +4,6 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-};
 export const dynamic = "force-dynamic";
 
 function PassResetForm() {
