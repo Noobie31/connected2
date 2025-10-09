@@ -1,13 +1,11 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
-export default function PasswordPage() {
+function PasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,13 +19,11 @@ export default function PasswordPage() {
   const handlePasswordLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (error) throw error;
 
       // Get role from user_metadata
@@ -72,7 +68,6 @@ export default function PasswordPage() {
             👁
           </button>
         </div>
-
         <button
           type="submit"
           disabled={loading}
@@ -82,5 +77,19 @@ export default function PasswordPage() {
         </button>
       </form>
     </div>
+  );
+}
+
+export default function PasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-500">
+        <div className="bg-white p-6 rounded-2xl shadow-md w-80">
+          <p className="text-center text-black">Loading...</p>
+        </div>
+      </div>
+    }>
+      <PasswordForm />
+    </Suspense>
   );
 }
