@@ -8,8 +8,14 @@ export default function ErrorPage() {
         href="/login"
         className="mt-4 text-blue-600 underline hover:text-blue-800"
       >
-        Go back to login
+        Contact Coordinator
       </a>
+      {/* <a
+        href="/login"
+        className="mt-4 text-blue-600 underline hover:text-blue-800"
+      >
+        Go back to login
+      </a> */}
     </div>
   );
 }
