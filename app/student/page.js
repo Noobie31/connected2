@@ -155,7 +155,7 @@ export default function StudentPage() {
         {user && (
           <button
             onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-red-600 transition-all"
+            className="bg-white text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-red-600 transition-all"
           >
             Sign out
           </button>
