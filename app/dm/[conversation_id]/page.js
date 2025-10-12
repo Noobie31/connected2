@@ -155,11 +155,11 @@ export default function DMPage() {
       hour12: true,
     });
   };
-  // [#075e54]
+
   return (
     <div className="flex flex-col h-screen bg-[#efeae2] relative">
       {/* iOS-style Header */}
-      <div className="bg-gray-800 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+      <div className="bg-[#075e54] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-3 flex-1">
           <button 
             onClick={() => window.history.back()}
