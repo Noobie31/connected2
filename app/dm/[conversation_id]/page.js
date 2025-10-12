@@ -12,6 +12,8 @@ export default function DMPage() {
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [otherParticipant, setOtherParticipant] = useState(null);
+  const [isOnline, setIsOnline] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -36,9 +38,61 @@ export default function DMPage() {
       } = await supabase.auth.getUser();
       if (!user) return;
       setUserEmail(user.email);
+      
+      // Fetch conversation participants
+      if (conversation_id) {
+        const { data: conversation } = await supabase
+          .from("conversations")
+          .select("participant1, participant2")
+          .eq("id", conversation_id)
+          .single();
+        
+        if (conversation) {
+          const otherEmail = conversation.participant1 === user.email 
+            ? conversation.participant2 
+            : conversation.participant1;
+          
+          // Try to fetch from student_course first
+          let { data: student } = await supabase
+            .from("student_course")
+            .select("name")
+            .eq("email", otherEmail)
+            .maybeSingle();
+          
+          if (student) {
+            setOtherParticipant({
+              name: student.name,
+              email: otherEmail,
+              type: 'student'
+            });
+          } else {
+            // Try to fetch from course_teacher
+            let { data: teacher } = await supabase
+              .from("course_teacher")
+              .select("teacher_name")
+              .eq("teacher_email", otherEmail)
+              .maybeSingle();
+            
+            if (teacher) {
+              setOtherParticipant({
+                name: teacher.teacher_name,
+                email: otherEmail,
+                type: 'teacher'
+              });
+            } else {
+              // Fallback to email
+              setOtherParticipant({
+                name: otherEmail.split('@')[0],
+                email: otherEmail,
+                type: 'unknown'
+              });
+            }
+          }
+        }
+      }
     };
     getUser();
-  }, []);
+  }, [conversation_id]);
 
   useEffect(() => {
     if (!conversation_id) return;
@@ -66,6 +120,10 @@ export default function DMPage() {
               return [...prev, payload.new];
             });
             scrollToBottom();
+            
+            // Update online status when receiving message
+            setIsOnline(true);
+            setTimeout(() => setIsOnline(false), 5000);
           }
         }
       )
@@ -155,11 +213,11 @@ export default function DMPage() {
       hour12: true,
     });
   };
-
+  // [#075e54] 
   return (
     <div className="flex flex-col h-screen bg-[#efeae2] relative">
       {/* iOS-style Header */}
-      <div className="bg-[#075e54] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+      <div className="bg-gray-700 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-3 flex-1">
           <button 
             onClick={() => window.history.back()}
@@ -168,12 +226,23 @@ export default function DMPage() {
             <ArrowLeft size={24} />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-700 font-semibold">
-              {userEmail?.[0]?.toUpperCase() || "?"}
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-semibold text-lg backdrop-blur-sm">
+              {otherParticipant?.name?.[0]?.toUpperCase() || "?"}
             </div>
             <div>
-              <h2 className="font-semibold text-base">Chat</h2>
-              <p className="text-xs text-gray-200">online</p>
+              <h2 className="font-semibold text-base">
+                {otherParticipant?.name || "Loading..."}
+              </h2>
+              <p className="text-xs text-gray-200">
+                {isOnline ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    typing...
+                  </span>
+                ) : (
+                  "tap for info"
+                )}
+              </p>
             </div>
           </div>
         </div>
