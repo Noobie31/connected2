@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
         } = await supabase.auth.getSession();
 
         // List of pages that don't require auth
-        const authLessPages = ['/login', '/password', '/error', '/coordinator'];
+        const authLessPages = ['/login', '/password', '/error', '/coordinator',  '/check-email', '/passrst'];
         const isAuthLessPage = authLessPages.some(page => pathname?.includes(page));
 
         if (session?.user) {
