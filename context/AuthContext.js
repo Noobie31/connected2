@@ -20,6 +20,10 @@ export function AuthProvider({ children }) {
           data: { session },
         } = await supabase.auth.getSession();
 
+        // List of pages that don't require auth
+        const authLessPages = ['/login', '/password', '/error', '/coordinator'];
+        const isAuthLessPage = authLessPages.some(page => pathname?.includes(page));
+
         if (session?.user) {
           setUser(session.user);
           // If user is logged in but on login page, redirect to dashboard
@@ -28,8 +32,8 @@ export function AuthProvider({ children }) {
           }
         } else {
           setUser(null);
-          // If not logged in and not on login page, redirect to login
-          if (pathname !== '/login' && !pathname?.includes('/password') && !pathname?.includes('/error')) {
+          // If not logged in and not on an auth-less page, redirect to login
+          if (!isAuthLessPage) {
             router.push('/login');
           }
         }
