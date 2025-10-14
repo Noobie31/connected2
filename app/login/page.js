@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "../../lib/supabase";
 
@@ -12,10 +12,23 @@ import uni from "../../images/uni.png";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const params = useSearchParams();
   const router = useRouter();
 
   const DUMMY = process.env.NEXT_PUBLIC_DUMMY_AUTH === "true";
   const DEV_PASS = process.env.NEXT_PUBLIC_DEV_PASSWORD || "devpass";
+
+  // 🧠 Prefill logic
+  useEffect(() => {
+    const queryEmail = params.get("email");
+    if (queryEmail) {
+      setEmail(queryEmail);
+      localStorage.setItem("prefill_email", queryEmail);
+    } else {
+      const stored = localStorage.getItem("prefill_email");
+      if (stored) setEmail(stored);
+    }
+  }, [params]);
 
   const devFlow = async (email) => {
     const res = await fetch("/api/dev-auth", {
@@ -114,7 +127,6 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
 
       <div className="relative mb-10 z-10 flex flex-col items-center w-full max-w-sm -translate-y-25">
-        {/* === Image Group === */}
         <div className="flex flex-col items-center gap-2">
           <Image
             src={logo}
@@ -133,11 +145,7 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* === Login Form (no box) === */}
         <div className="mt-20 w-full flex flex-col items-center space-y-4">
-          {/* <h1 className="text-2xl font-bold text-center text-white drop-shadow-lg">
-            Login
-          </h1> */}
           <input
             type="email"
             placeholder="Enter your email"
