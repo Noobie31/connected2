@@ -16,7 +16,7 @@ export default function CheckEmailPage() {
       <p className="text-gray-600 mb-6">
         If your email is registered, a login link has been sent.
       </p>
-
+{/* 
       {magicLink ? (
         <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
           <p className="text-gray-700 mb-2">Dev Mode Magic Link:</p>
@@ -29,7 +29,7 @@ export default function CheckEmailPage() {
         </div>
       ) : (
         <p className="text-gray-400">No link found (maybe session expired).</p>
-      )}
+      )} */}
     </div>
   );
 }
